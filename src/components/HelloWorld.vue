@@ -14,6 +14,12 @@
       <a href="../static/minesweeper/index.html">click here to play</a>
       <h2>{{ msgMineSweeper }}</h2>
     </div>
+    <div class="Whac_A_Mole" style="width:660px;height:200px;float:left;">
+      <img src="../../static/img/whac_a_mole.jpg" width="80px" height="80px" />
+      <br />
+      <a href="../static/whac-A-Mole/index.html">click here to play</a>
+      <h2>{{ msgWhacAMole }}</h2>
+    </div>
   </div>
 </template>
 
@@ -23,7 +29,8 @@ export default {
   data() {
     return {
       msg2048: "Welcome to the world of 2048!",
-      msgMineSweeper: "Come on to play MineSweeper!"
+      msgMineSweeper: "Come on to play MineSweeper!",
+      msgWhacAMole: "Come on to play Whac A Mole!"
     };
   }
 };
