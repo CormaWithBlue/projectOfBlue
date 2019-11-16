@@ -3,8 +3,14 @@
     <div class="xbgt">
       <img src="../../assets/logo_header.png" height="50px" />
     </div>
+
     <div class="welcome">
       <img src="../../assets/welcome.gif" height="150px" width="300px" />
+    </div>
+    <div class="signIn">
+      <el-link icon="el-icon-s-custom" class="elLinkSignIn">登录</el-link>
+      <a>|</a>
+      <el-link icon="el-icon-coordinate" class="elLinkSignIn">注册</el-link>
     </div>
   </div>
 </template>
@@ -42,5 +48,17 @@ export default {
   float: left;
   display: table-cell;
   vertical-align: middle;
+}
+.signIn {
+  width: 200px;
+  /* height: 150px; */
+  float: left;
+  font-size: 20px;
+  font-weight: bold;
+  /* line-height: 30px; */
+}
+.elLinkSignIn {
+  font-size: 20px;
+  font-weight: 800;
 }
 </style>

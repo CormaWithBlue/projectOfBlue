@@ -1,5 +1,22 @@
 <template>
   <div class="photoWall">
+    <div>
+      <el-upload
+        :action="urlXb+'/upload'"
+        multiple
+        :limit="5"
+        :on-success="uploadSuccess"
+        :before-upload="beforeUpload"
+        ref="upload"
+      >
+        <el-button size="middle" type="primary">点击上传</el-button>
+        <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过3MB</div>
+      </el-upload>
+    </div>
+    <br />
+    <br />
+    <br />
+    <br />
     <!-- <el-button type="primary" @click="upload()">上传照片</el-button> -->
     <viewer :images="photoList">
       <img
@@ -25,8 +42,9 @@ export default {
       msg: "Welcome to Your Vue.js App",
       getFileList: [],
       photoList: [],
-      // urlXb: "http://192.168.31.182:8899",
-      urlXb: "",
+      urlXb: "http://139.180.174.248",
+      // urlXb: "http://192.168.31.182",
+      // urlXb: "",
       pathXb: "/GetFileList",
       errorImg: null
     };
@@ -61,6 +79,12 @@ export default {
 
           self.photoList.push(self.getFileList[self.photoList.length]);
           self.photoList.push(self.getFileList[self.photoList.length]);
+          self.photoList.push(self.getFileList[self.photoList.length]);
+          self.photoList.push(self.getFileList[self.photoList.length]);
+          self.photoList.push(self.getFileList[self.photoList.length]);
+          self.photoList.push(self.getFileList[self.photoList.length]);
+          self.photoList.push(self.getFileList[self.photoList.length]);
+          // self.photoList.push(self.getFileList[self.photoList.length]);
           console.log("getFileList:" + self.getFileList);
           console.log("num " + self.getFileList.length);
           console.log("getFileList1:" + self.getFileList[0]);
@@ -97,7 +121,7 @@ export default {
         document.documentElement.scrollTop ||
         document.body.scrollTop;
       let offSetTop = document.getElementById(
-        "img_" + (this.photoList.length - 2)
+        "img_" + (this.photoList.length - 7)
       ).offsetTop;
       // console.log("scrollTop: " + scrollTop);
       // console.log("offsetTop: " + offSetTop);
@@ -107,7 +131,36 @@ export default {
         this.photoList.length < this.getFileList.length
       ) {
         this.photoList.push(this.getFileList[this.photoList.length]);
+        // this.photoList.push(this.getFileList[this.photoList.length]);
+        // this.photoList.push(this.getFileList[this.photoList.length]);
+        // this.photoList.push(this.getFileList[this.photoList.length]);
       }
+    },
+    // uploadSuccess(response, file, fileList) {
+    //   alert("上传成功");
+    // },
+    uploadSuccess(res, file, fileList) {
+      this.$notify.success({
+        title: "成功",
+        message: `文件上传成功`
+      });
+      this.$refs.upload.clearFiles();
+    },
+    beforeUpload(file) {
+      const isJPG = (file.type === "image/jpeg") | (file.type === "image/png");
+      const isLt3M = file.size / 1024 / 1024 < 3;
+
+      if (!isJPG) {
+        this.$message.error("上传图片只能是 JPG 或 PNG 格式!");
+      }
+      if (!isLt3M) {
+        this.$message.error("上传头像图片大小不能超过 3MB!");
+      }
+      if (!(isJPG && isLt3M)) {
+        return false;
+      }
+
+      return true;
     }
     // clickPhoto: function() {
     //   var self = this;
@@ -134,7 +187,7 @@ export default {
   /* text-align: center; */
 }
 .photoShow {
-  width: 55%;
+  width: 20%;
   height: auto;
   margin-bottom: 100px;
   margin-right: 100px;
