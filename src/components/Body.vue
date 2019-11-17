@@ -2,6 +2,10 @@
   <div class="public_body">
     <!-- <img src="../assets/welcome.gif" /> -->
     <br />
+    <br />
+    <br />
+    <br />
+    <br />
 
     <div class="game">
       <a href="../static/2048/index.html">
