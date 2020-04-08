@@ -7,18 +7,20 @@
     <br />
     <br />
 
+    <!-- 游戏图标显示 -->
+    <!-- 2048 -->
     <div class="game">
       <a href="../static/2048/index.html">
         <img src="../../static/img/2048.png" class="gameIcon" />
       </a>
     </div>
-
+    <!-- 扫雷 -->
     <div class="game">
       <a href="../static/minesweeper/index.html">
         <img src="../../static/img/minesweeper.png" class="gameIcon" />
       </a>
     </div>
-
+    <!-- 打地鼠 -->
     <div class="game">
       <a href="../static/whac-A-Mole/index.html">
         <img src="../../static/img/whac_a_mole.png" class="gameIcon" />
@@ -34,7 +36,8 @@ export default {
   name: "Body",
   data() {
     return {};
-  }
+  },
+  methods: {},
 };
 </script>
 

@@ -8,6 +8,11 @@ import 'element-ui/lib/theme-chalk/index.css'
 import axios from 'axios'
 import Viewer from "v-viewer"
 import 'viewerjs/dist/viewer.css'
+import VueContextMenu from '@xunlei/vue-context-menu'
+
+
+
+
 
 Vue.config.productionTip = false
 
@@ -22,6 +27,7 @@ Vue.prototype.$axios = axios;
 // axios.defaults.baseURL = '/apis';
 
 Vue.use(ElementUI);
+Vue.use(VueContextMenu);
 
 Vue.use(Viewer);
 Viewer.setDefaults({
