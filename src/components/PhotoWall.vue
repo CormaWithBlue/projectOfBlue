@@ -26,6 +26,7 @@
               :limit="5"
               :on-success="uploadSuccess"
               :before-upload="beforeUpload"
+              :auto-upload="false"
               ref="upload"
               name="upload"
             >
@@ -38,13 +39,14 @@
             </el-upload>
           </el-form-item>
           <!-- 获取到图片说明并存入库里 -->
-          <!-- <el-form-item label="图片说明:" :label-width="formLabelWidth">
-            <el-input v-model="form.name" autocomplete="off"></el-input>
-          </el-form-item>-->
+          <el-form-item label="图片说明:" :label-width="formLabelWidth">
+            <el-input v-model="inputData" autocomplete="off" placeholder="请输入图片说明"></el-input>
+          </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
           <el-button @click="dialogFormVisible = false">取 消</el-button>
-          <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+          <el-button type="primary" @click="submitUpload()">确 定</el-button>
+          <!-- @click="dialogFormVisible = false" -->
         </div>
       </el-dialog>
     </div>
@@ -60,6 +62,7 @@
       :limit="5"
       :on-success="uploadSuccess"
       :before-upload="beforeUpload"
+      :auto-upload="false"
       ref="upload"
     >
       <!-- <el-button size="middle" type="primary">点击上传</el-button> -->
@@ -101,6 +104,7 @@ export default {
       // urlXb: "http://192.168.31.109",
       // urlXb: "http://192.168.31.116:3000",
       urlXb: "http://192.168.31.109:3000",
+      // urlXb: "localhost",
       pathXb: "/GetFileList",
       // pathXb: "/upload",
       errorImg: null,
@@ -121,7 +125,8 @@ export default {
       updatePicPath: "/UpdatePicture",
       deletePicPath: "/DeletePicture",
       contextMenuTarget: document.body, //绑定的dom
-      contextMenuVisible: false
+      contextMenuVisible: false,
+      inputData: ""
     };
   },
   mounted() {
@@ -224,6 +229,12 @@ export default {
       // });
     },
 
+    //上传图片，点击按钮再上传
+    submitUpload: function() {
+      this.$refs.upload.submit();
+      this.dialogFormVisible = false;
+    },
+
     //上下滚动页面查看全部图片
     handleScroll: function() {
       // let pageYOffset = window.pageYOffset;
@@ -275,17 +286,18 @@ export default {
       this.$axios
         .request({
           // url: self.urlXb + ":3000" + self.addPicPath,
-          url: self.addPicPath,
+          url: "http://192.168.31.109:3000" + self.addPicPath,
           method: "post",
           data: {
             date: self.getDate(),
-            text: "",
+            text: self.inputData,
             path: self.pathXb + "/" + file.name
           },
           params: {}
         })
         .then(function(response) {
           console.log("存数据库成功");
+          // self.upload();
         })
         .catch(err => {
           console.log("catch" + err);
