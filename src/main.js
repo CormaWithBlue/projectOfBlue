@@ -51,6 +51,7 @@ Viewer.setDefaults({
 
 
 /* eslint-disable no-new */
+//vue根对象
 new Vue({
   el: '#app',
   router,

@@ -11,13 +11,13 @@
     <!-- <a href="javascript:;" @click="deletePicture()">删除</a>
     </context-menu>-->
     <div>
-      <el-button type="primary" @click="dialogFormVisible = true" size="middle">上传图片</el-button>
+      <el-button type="primary" @click="dialogFormVisible = true" size="middle">上传</el-button>
       <el-button type="warning" @click="batchManage()" size="middle">批量管理</el-button>
     </div>
     <div>
-      <el-dialog title="上传图片" :visible.sync="dialogFormVisible">
+      <el-dialog title="上传" :visible.sync="dialogFormVisible">
         <el-form :model="form" name="upload">
-          <el-form-item label="上传图片:" :label-width="formLabelWidth"></el-form-item>
+          <el-form-item label="上传图片/视频:" :label-width="formLabelWidth"></el-form-item>
           <el-form-item>
             <el-upload
               :action="urlXb + '/upload'"
@@ -39,8 +39,14 @@
             </el-upload>
           </el-form-item>
           <!-- 获取到图片说明并存入库里 -->
-          <el-form-item label="图片说明:" :label-width="formLabelWidth">
-            <el-input v-model="inputData" autocomplete="off" placeholder="请输入图片说明"></el-input>
+          <el-form-item label="说明:" :label-width="formLabelWidth">
+            <el-input
+              v-model="inputData"
+              autocomplete="off"
+              placeholder="请输入说明,最长60个字"
+              maxlength="60"
+              class="pictureText"
+            ></el-input>
           </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
@@ -71,22 +77,33 @@
 
     <!-- <el-button type="primary" @click="upload()">上传照片</el-button> -->
 
-    <viewer :images="photoList">
-      <!-- <img
+    <div v-for="(fileList, i) in photoList">
+      <viewer :images="photoList">
+        <!-- <img
         class="photoShow"
         alt="photo of ball"
         v-for="(fileList, i) in photoList"
         :src="urlXb + '/photo' + photoList[i]"
         :id="'img_' + i"
-      />-->
-      <img
-        class="photoShow"
+        />-->
+        <!-- v-if ="!photoList[i].match(".mp4")" -->
+        <img
+          alt="photo of ball"
+          class="photoShow"
+          v-if="getFileType(photoList[i])==1"
+          :src="urlXb + '/' + photoList[i]"
+          :id="'img_' + i"
+        />
+      </viewer>
+      <video
+        v-if="getFileType(photoList[i])==2"
         alt="photo of ball"
-        v-for="(fileList, i) in photoList"
+        controls="controls"
+        class="photoShow"
         :src="urlXb + '/' + photoList[i]"
         :id="'img_' + i"
-      />
-    </viewer>
+      ></video>
+    </div>
   </div>
 </template>
 
@@ -126,7 +143,8 @@ export default {
       deletePicPath: "/DeletePicture",
       contextMenuTarget: document.body, //绑定的dom
       contextMenuVisible: false,
-      inputData: ""
+      inputData: "",
+      arr: { startDate: "", endDate: "", text: "" }
     };
   },
   mounted() {
@@ -297,6 +315,7 @@ export default {
         })
         .then(function(response) {
           console.log("存数据库成功");
+
           // self.upload();
         })
         .catch(err => {
@@ -305,22 +324,49 @@ export default {
       this.$refs.upload.clearFiles();
     },
 
-    //上传前对图片的格式和大小判断
+    // //判断文件类型是图片还是视频
+    // //1.传参：文件的名称:fileName
+    // //2.返回值：0--既不是图片也不是视频  1--图片  2--视频
+    getFileType: function(fileName) {
+      if (
+        fileName.search(/jpg/i) > 0 ||
+        fileName.search(/png/i) > 0 ||
+        fileName.search(/jpeg/i) > 0 ||
+        fileName.search(/bmp/i) > 0 ||
+        fileName.search(/gif/i) > 0
+      ) {
+        return 1;
+      } else if (fileName.search(/mp4/i) > 0) {
+        return 2;
+      } else {
+        return 0;
+      }
+    },
+
+    //上传前对图片和视频的格式和大小判断
     beforeUpload(file) {
-      const isJPG = (file.type === "image/jpeg") | (file.type === "image/png");
+      console.log("文件名：" + file.name + "  文件类型：" + file.type);
+      const fileType = this.getFileType(file.name);
+
       const isLt3M = file.size / 1024 / 1024 < 3;
+      const isLt45M = file.size / 1024 / 1024 < 45;
 
-      if (!isJPG) {
-        this.$message.error("上传图片只能是 JPG 或 PNG 格式!");
+      if (fileType == 0) {
+        this.$message.error(
+          "上传图片只能是 JPEG/PNG/JPG/BMP/GIF 格式,视频只能是 MP4 格式！！"
+        );
       }
-      if (!isLt3M) {
-        this.$message.error("上传图片大小不能超过 3MB!");
+      if (!isLt3M && fileType == 1) {
+        this.$message.error("上传图片大小不能超过 3 MB!");
       }
-      if (!(isJPG && isLt3M)) {
-        return false;
+      if (!isLt45M && fileType == 2) {
+        this.$message.error("上传视频大小不能超过 45 MB!");
+      }
+      if ((fileType == 1 && isLt3M) || (fileType == 2 && isLt45M)) {
+        return true;
       }
 
-      return true;
+      return false;
     },
     // clickPhoto: function() {
     //   var self = this;
@@ -332,6 +378,24 @@ export default {
     //   );
     // }
 
+    selectPicture: function(arr) {
+      let self = this;
+      this.$axios
+        .request({
+          url: "http://192.168.31.109:3000" + self.findPicPath,
+          method: "get",
+          data: {},
+          params: {}
+        })
+        .then(function(response) {
+          console.log("查询成功");
+          // self.upload();
+        })
+        .catch(err => {
+          console.log("catch" + err);
+        });
+    },
+
     //批量管理图片
     batchManage: function() {
       //1.页面中的图片变成方形缩略图形式，原本图片隐藏，每张图片左上角/左下角增加复选框
@@ -342,8 +406,6 @@ export default {
       //5.批量删除照片：弹出二次确认弹窗，确认后删除用户选中的图片
       //6.完成管理：页面中图片去掉复选框，收起页面增加的按钮，将“上传”和“批量管理”按钮进行显示
     }
-
-    //翻页（分页）
   }
 };
 </script>
