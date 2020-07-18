@@ -30,7 +30,7 @@
               ref="upload"
               name="upload"
             >
-              <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过3MB</div>
+              <div slot="tip" class="el-upload__tip">只能上传图片或视频，图片大小不超过3MB，视频大小不超过45MB</div>
               <i class="el-icon-upload"></i>
               <div class="el-upload__text">
                 将文件拖到此处，或
@@ -50,7 +50,7 @@
           </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
-          <el-button @click="dialogFormVisible = false">取 消</el-button>
+          <el-button @click="cancelUpload()">取 消</el-button>
           <el-button type="primary" @click="submitUpload()">确 定</el-button>
           <!-- @click="dialogFormVisible = false" -->
         </div>
@@ -77,32 +77,34 @@
 
     <!-- <el-button type="primary" @click="upload()">上传照片</el-button> -->
 
-    <div v-for="(fileList, i) in photoList">
-      <viewer :images="photoList">
-        <!-- <img
+    <div v-for="(fileList, i) in photoList" class="multimediaShow">
+      <el-tooltip class="itemToolTip" effect="light" :content="photoList[i]" placement="top">
+        <viewer :images="photoList">
+          <!-- <img
         class="photoShow"
         alt="photo of ball"
         v-for="(fileList, i) in photoList"
         :src="urlXb + '/photo' + photoList[i]"
         :id="'img_' + i"
-        />-->
-        <!-- v-if ="!photoList[i].match(".mp4")" -->
-        <img
+          />-->
+          <!-- v-if ="!photoList[i].match(".mp4")" -->
+          <img
+            alt="photo of ball"
+            v-if="getFileType(photoList[i])==1"
+            :src="urlXb + '/' + photoList[i]"
+            :id="'img_' + i"
+            style="cursor:pointer"
+          />
+        </viewer>
+        <video
+          v-if="getFileType(photoList[i])==2"
           alt="photo of ball"
-          class="photoShow"
-          v-if="getFileType(photoList[i])==1"
+          controls="controls"
           :src="urlXb + '/' + photoList[i]"
           :id="'img_' + i"
-        />
-      </viewer>
-      <video
-        v-if="getFileType(photoList[i])==2"
-        alt="photo of ball"
-        controls="controls"
-        class="photoShow"
-        :src="urlXb + '/' + photoList[i]"
-        :id="'img_' + i"
-      ></video>
+          style="cursor:pointer"
+        ></video>
+      </el-tooltip>
     </div>
   </div>
 </template>
@@ -251,6 +253,14 @@ export default {
     submitUpload: function() {
       this.$refs.upload.submit();
       this.dialogFormVisible = false;
+      this.inputData = "";
+    },
+
+    //取消上传图片，点击按钮取消
+    cancelUpload: function() {
+      this.$refs.upload.clearFiles();
+      this.dialogFormVisible = false;
+      this.inputData = "";
     },
 
     //上下滚动页面查看全部图片
@@ -270,8 +280,9 @@ export default {
         document.documentElement.scrollTop ||
         document.body.scrollTop;
       let offSetTop = document.getElementById(
-        "img_" + (this.photoList.length - 7)
+        "img_" + (this.photoList.length - 1)
       ).offsetTop;
+      // document.getElementById("video_" + (this.photoList.length - 1)).offsetTop
       // console.log("scrollTop: " + scrollTop);
       // console.log("offsetTop: " + offSetTop);
       // console.log("length-1:" + (this.photoList.length - 1));
@@ -418,26 +429,47 @@ export default {
   /* width: 100%; */
   background-size: 100% auto;
   background-repeat: repeat-y;
+  width: 100%;
+  height: auto;
+  float: left;
   /* padding-top: 100px; */
   /* text-align: center; */
 }
-.photoShow {
-  width: 20%;
+.multimediaShow {
+  width: 16%;
   height: auto;
-  margin-bottom: 100px;
-  margin-right: 100px;
-  border: 15px solid rgb(185, 167, 127);
-  /* border-radius: 30px; */
-  box-shadow: 10px 10px 15px #888888;
+  float: left;
+  margin-top: 50px;
+  margin-bottom: 50px;
+  margin-right: 50px;
+  margin-left: 50px;
+  border: 2px solid rgb(185, 167, 127);
+  border-radius: 20px;
+  box-shadow: 5px 5px 15px #888888;
   border-image: url(../assets/border_img.png) 30 30 round;
-  border-image-width: 40px;
+  border-image-width: 30px;
   border-image-outset: 15px;
-  /* display: block; */
-
-  /* text-align: center; */
 }
+
+img {
+  width: 100%;
+  height: auto;
+  float: left;
+}
+
+video {
+  width: 100%;
+  height: 100%;
+  float: left;
+
+  /* display: inline-block; */
+}
+
 .el-upload .el-upload-dragger {
   width: 550px;
   height: 350px;
 }
-</style>
+.itemToolTip {
+  margin: 4px;
+}
+</style> 
