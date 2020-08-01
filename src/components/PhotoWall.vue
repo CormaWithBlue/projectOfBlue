@@ -20,7 +20,7 @@
           <el-form-item label="上传图片/视频:" :label-width="formLabelWidth"></el-form-item>
           <el-form-item>
             <el-upload
-              :action="urlXb + '/upload'"
+              :action="urlXb + '/uploadPicture?uploadParams=' + inputData"
               multiple
               drag
               :limit="5"
@@ -62,18 +62,19 @@
     <br />
 
     <!-- //上传功能 -->
-    <el-upload
-      :action="urlXb + '/upload'"
+    <!-- <el-upload
+      :action="urlXb + '/upload?test=123'"
       multiple
       :limit="5"
       :on-success="uploadSuccess"
       :before-upload="beforeUpload"
       :auto-upload="false"
       ref="upload"
+      :data="uploadParams"
     >
-      <!-- <el-button size="middle" type="primary">点击上传</el-button> -->
-      <!-- <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过3MB</div> -->
-    </el-upload>
+    </el-upload>-->
+    <!-- <el-button size="middle" type="primary">点击上传</el-button> -->
+    <!-- <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过3MB</div> -->
 
     <!-- <el-button type="primary" @click="upload()">上传照片</el-button> -->
 
@@ -122,8 +123,8 @@ export default {
       photoList: [],
       // urlXb: "http://192.168.31.109",
       // urlXb: "http://192.168.31.116:3000",
-      urlXb: "http://192.168.31.109:3000",
-      // urlXb: "localhost",
+      // urlXb: "http://192.168.31.109:3000",//小服务器
+      urlXb: "http://localhost:3000",
       pathXb: "/GetFileList",
       // pathXb: "/upload",
       errorImg: null,
@@ -136,31 +137,32 @@ export default {
         delivery: false,
         type: [],
         resource: "",
-        desc: ""
+        desc: "",
       },
       formLabelWidth: "120px",
-      addPicPath: "/AddPicture",
+      addPicPath: "/uploadPicture",
       findPicPath: "/FindPicture",
       updatePicPath: "/UpdatePicture",
       deletePicPath: "/DeletePicture",
       contextMenuTarget: document.body, //绑定的dom
       contextMenuVisible: false,
       inputData: "",
-      arr: { startDate: "", endDate: "", text: "" }
+      arr: { id: "", startDate: "", endDate: "", text: "" },
+      // uploadParams: "?uploadParams=" + this.inputData,
     };
   },
   mounted() {
-    this.upload();
+    this.getPicture();
     window.addEventListener("scroll", this.handleScroll);
   },
   methods: {
     //日期时间格式处理
-    conver: function(s) {
+    conver: function (s) {
       return s < 10 ? "0" + s : s;
     },
 
     //获取当前时间
-    getDate: function() {
+    getDate: function () {
       var myDate = new Date();
       //获取当前年
       var year = myDate.getFullYear();
@@ -189,8 +191,8 @@ export default {
       return now;
     },
 
-    //上传图片
-    upload: function() {
+    //获取图片列表
+    getPicture: function () {
       let self = this;
       this.$axios
         .request({
@@ -199,20 +201,21 @@ export default {
           params: {
             // 请求的参数
             // search: "biu",
-            // ball: 123
           },
           data: {
             // 使用post时，请求的body代表请求的主体内容
             // haha: "balabala"
-          }
+          },
         })
         //.then参数为函数，是promise为成功时要做的事，then返回一个promise对象
         // 注册promise状态变为成功后要做的事（等promise成功后，就会自动执行该方法）
         // response代表promise成功的结果，由nodejs异步操作上面的get后，自动作为参数传入then中的function
-        .then(function(response) {
+        .then(function (response) {
           //将this.getFileList赋值（为：this.$axios.get方法的返回值的then方法的返回值）
           // console.log("getFile1:" + JSON.stringify(response.data));
           self.getFileList = response.data;
+          // self.uploadParams = "?uploadParams=123123";
+          // + self.inputData;
 
           for (var i = 0; i < self.getFileList.length; i++) {
             self.photoList.push(self.getFileList[i]);
@@ -232,7 +235,7 @@ export default {
           console.log("getFileList1:" + self.getFileList[0]);
           // document.getElementById("img");
         })
-        .catch(err => {
+        .catch((err) => {
           console.log("catch" + err);
         });
 
@@ -250,21 +253,21 @@ export default {
     },
 
     //上传图片，点击按钮再上传
-    submitUpload: function() {
+    submitUpload: function () {
       this.$refs.upload.submit();
       this.dialogFormVisible = false;
       this.inputData = "";
     },
 
     //取消上传图片，点击按钮取消
-    cancelUpload: function() {
+    cancelUpload: function () {
       this.$refs.upload.clearFiles();
       this.dialogFormVisible = false;
       this.inputData = "";
     },
 
     //上下滚动页面查看全部图片
-    handleScroll: function() {
+    handleScroll: function () {
       // let pageYOffset = window.pageYOffset;
       // // console.log("pageYoffset: " + window.pageYOffset);
       // let scrollTop = document.documentElement.scrollTop;
@@ -305,7 +308,7 @@ export default {
       console.log("上传成功咯~");
       this.$notify.success({
         title: "成功",
-        message: `文件上传成功`
+        message: `文件上传成功`,
       });
       //axios
       let self = this;
@@ -314,22 +317,22 @@ export default {
       console.log("path:" + self.pathXb + "/" + file.name);
       this.$axios
         .request({
-          // url: self.urlXb + ":3000" + self.addPicPath,
-          url: "http://192.168.31.109:3000" + self.addPicPath,
+          url: self.urlXb + ":3000" + self.addPicPath,
+          // url: "http://192.168.31.109:3000" + self.addPicPath,
           method: "post",
           data: {
             date: self.getDate(),
             text: self.inputData,
-            path: self.pathXb + "/" + file.name
+            path: self.pathXb + "/" + file.name,
           },
-          params: {}
+          params: {},
         })
-        .then(function(response) {
+        .then(function (response) {
           console.log("存数据库成功");
 
           // self.upload();
         })
-        .catch(err => {
+        .catch((err) => {
           console.log("catch" + err);
         });
       this.$refs.upload.clearFiles();
@@ -338,7 +341,7 @@ export default {
     // //判断文件类型是图片还是视频
     // //1.传参：文件的名称:fileName
     // //2.返回值：0--既不是图片也不是视频  1--图片  2--视频
-    getFileType: function(fileName) {
+    getFileType: function (fileName) {
       if (
         fileName.search(/jpg/i) > 0 ||
         fileName.search(/png/i) > 0 ||
@@ -361,6 +364,9 @@ export default {
 
       const isLt3M = file.size / 1024 / 1024 < 3;
       const isLt45M = file.size / 1024 / 1024 < 45;
+
+      // this.uploadParams = "?uploadParams=" + this.inputData;
+      // console.log("upload:" + this.uploadParams);
 
       if (fileType == 0) {
         this.$message.error(
@@ -389,26 +395,26 @@ export default {
     //   );
     // }
 
-    selectPicture: function(arr) {
+    selectPicture: function (arr) {
       let self = this;
       this.$axios
         .request({
           url: "http://192.168.31.109:3000" + self.findPicPath,
           method: "get",
           data: {},
-          params: {}
+          params: {},
         })
-        .then(function(response) {
+        .then(function (response) {
           console.log("查询成功");
           // self.upload();
         })
-        .catch(err => {
+        .catch((err) => {
           console.log("catch" + err);
         });
     },
 
     //批量管理图片
-    batchManage: function() {
+    batchManage: function () {
       //1.页面中的图片变成方形缩略图形式，原本图片隐藏，每张图片左上角/左下角增加复选框
       //2.1 页面上方增加按钮，增加‘批量修改照片时间’，‘批量修改照片信息’，‘批量删除照片’和‘完成管理’按钮
       //2.2 页面隐藏上传和批量管理的按钮
@@ -416,8 +422,8 @@ export default {
       //4.批量修改照片信息：修改用户选中的照片的说明
       //5.批量删除照片：弹出二次确认弹窗，确认后删除用户选中的图片
       //6.完成管理：页面中图片去掉复选框，收起页面增加的按钮，将“上传”和“批量管理”按钮进行显示
-    }
-  }
+    },
+  },
 };
 </script>
 
