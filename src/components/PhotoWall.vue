@@ -78,30 +78,22 @@
 
     <!-- <el-button type="primary" @click="upload()">上传照片</el-button> -->
 
-    <div v-for="(fileList, i) in photoList" class="multimediaShow">
-      <el-tooltip class="itemToolTip" effect="light" :content="photoList[i]" placement="top">
-        <viewer :images="photoList">
-          <!-- <img
-        class="photoShow"
-        alt="photo of ball"
-        v-for="(fileList, i) in photoList"
-        :src="urlXb + '/photo' + photoList[i]"
-        :id="'img_' + i"
-          />-->
-          <!-- v-if ="!photoList[i].match(".mp4")" -->
+    <div v-for="(file_,i) in photoList" class="multimediaShow">
+      <el-tooltip class="itemToolTip" effect="light" :content="photoList[i].text" placement="top">
+        <viewer>
           <img
             alt="photo of ball"
-            v-if="getFileType(photoList[i])==1"
-            :src="urlXb + '/' + photoList[i]"
+            v-if="getFileType(photoList[i].path)==1"
+            :src="urlXb  +'/'+ photoList[i].path"
             :id="'img_' + i"
             style="cursor:pointer"
           />
         </viewer>
         <video
-          v-if="getFileType(photoList[i])==2"
+          v-if="getFileType(photoList[i].path)==2"
           alt="photo of ball"
           controls="controls"
-          :src="urlXb + '/' + photoList[i]"
+          :src="urlXb  +'/'+ photoList[i].path"
           :id="'img_' + i"
           style="cursor:pointer"
         ></video>
@@ -123,8 +115,8 @@ export default {
       photoList: [],
       // urlXb: "http://192.168.31.109",
       // urlXb: "http://192.168.31.116:3000",
-      // urlXb: "http://192.168.31.109:3000",//小服务器
-      urlXb: "http://localhost:3000",
+      urlXb: "http://192.168.31.109:3000", //小服务器
+      // urlXb: "http://localhost:3000",
       pathXb: "/GetFileList",
       // pathXb: "/upload",
       errorImg: null,
@@ -141,7 +133,7 @@ export default {
       },
       formLabelWidth: "120px",
       addPicPath: "/uploadPicture",
-      findPicPath: "/FindPicture",
+      findPicPath: "/GetFileList",
       updatePicPath: "/UpdatePicture",
       deletePicPath: "/DeletePicture",
       contextMenuTarget: document.body, //绑定的dom
@@ -198,44 +190,32 @@ export default {
         .request({
           url: self.urlXb + self.pathXb, //通知网卡去链接进行请求
           method: "get",
-          params: {
-            // 请求的参数
-            // search: "biu",
-          },
-          data: {
-            // 使用post时，请求的body代表请求的主体内容
-            // haha: "balabala"
-          },
+          params: {},
+          data: {},
         })
         //.then参数为函数，是promise为成功时要做的事，then返回一个promise对象
         // 注册promise状态变为成功后要做的事（等promise成功后，就会自动执行该方法）
         // response代表promise成功的结果，由nodejs异步操作上面的get后，自动作为参数传入then中的function
         .then(function (response) {
-          //将this.getFileList赋值（为：this.$axios.get方法的返回值的then方法的返回值）
-          // console.log("getFile1:" + JSON.stringify(response.data));
-          self.getFileList = response.data;
-          // self.uploadParams = "?uploadParams=123123";
-          // + self.inputData;
+          console.log(
+            "getPicture.response.data:" + JSON.stringify(response.data)
+          );
 
-          for (var i = 0; i < self.getFileList.length; i++) {
+          self.getFileList = response.data.localtoken;
+
+          for (
+            var i = 0;
+            i < (self.getFileList.length > 8 ? 8 : self.getFileList.length);
+            i++
+          ) {
+            self.getFileList[i].text = self.getFileList[i].text
+              ? self.getFileList[i].text
+              : "";
             self.photoList.push(self.getFileList[i]);
           }
-          //查询图片列表函数
-          // self.handleScroll();
-          // self.photoList.push(self.getFileList[self.photoList.length]);
-          // self.photoList.push(self.getFileList[self.photoList.length]);
-          // self.photoList.push(self.getFileList[self.photoList.length]);
-          // self.photoList.push(self.getFileList[self.photoList.length]);
-          // self.photoList.push(self.getFileList[self.photoList.length]);
-          // self.photoList.push(self.getFileList[self.photoList.length]);
-          // self.photoList.push(self.getFileList[self.photoList.length]);
-          // self.photoList.push(self.getFileList[self.photoList.length]);
-          console.log("getFileList:" + self.getFileList);
-          console.log("num " + self.getFileList.length);
-          console.log("getFileList1:" + self.getFileList[0]);
-          // document.getElementById("img");
         })
         .catch((err) => {
+          console.log("error!!!!!!!!!!!!!!!!!!");
           console.log("catch" + err);
         });
 
@@ -268,13 +248,14 @@ export default {
 
     //上下滚动页面查看全部图片
     handleScroll: function () {
+      console.log("handleScroll in111??");
       // let pageYOffset = window.pageYOffset;
       // // console.log("pageYoffset: " + window.pageYOffset);
       // let scrollTop = document.documentElement.scrollTop;
       // // console.log("scrollTop: " + scrollTop);
       // let scrollTopBody = document.body.scrollTop;
       // // console.log("scrollTopBody: " + scrollTopBody);
-      // console.log(getFileList);
+
       if (this.getFileList.length < 2) {
         return;
       }
@@ -282,21 +263,19 @@ export default {
         window.pageYOffset ||
         document.documentElement.scrollTop ||
         document.body.scrollTop;
+      console.log(
+        "handleScroll_this.getFileList.length:" + this.getFileList.length
+      );
       let offSetTop = document.getElementById(
         "img_" + (this.photoList.length - 1)
       ).offsetTop;
-      // document.getElementById("video_" + (this.photoList.length - 1)).offsetTop
-      // console.log("scrollTop: " + scrollTop);
-      // console.log("offsetTop: " + offSetTop);
-      // console.log("length-1:" + (this.photoList.length - 1));
+      console.log("scrollTop:" + scrollTop + "&&offSetTop:" + offSetTop);
       if (
-        scrollTop > offSetTop &&
+        scrollTop > offSetTop - 300 &&
         this.photoList.length < this.getFileList.length
       ) {
+        console.log("handleScroll in??");
         this.photoList.push(this.getFileList[this.photoList.length]);
-        // this.photoList.push(this.getFileList[this.photoList.length]);
-        // this.photoList.push(this.getFileList[this.photoList.length]);
-        // this.photoList.push(this.getFileList[this.photoList.length]);
       }
     },
     // uploadSuccess(response, file, fileList) {
@@ -304,7 +283,7 @@ export default {
     // },
 
     //图片上传成功后，更新数据库
-    uploadSuccess(res, file, fileList) {
+    uploadSuccess(res, file) {
       console.log("上传成功咯~");
       this.$notify.success({
         title: "成功",
@@ -314,16 +293,15 @@ export default {
       let self = this;
       //let date = getDate();
       console.log("date:" + self.getDate());
-      console.log("path:" + self.pathXb + "/" + file.name);
+      console.log("path:" + file.name);
       this.$axios
         .request({
           url: self.urlXb + ":3000" + self.addPicPath,
-          // url: "http://192.168.31.109:3000" + self.addPicPath,
           method: "post",
           data: {
             date: self.getDate(),
             text: self.inputData,
-            path: self.pathXb + "/" + file.name,
+            path: file.name,
           },
           params: {},
         })
@@ -395,23 +373,23 @@ export default {
     //   );
     // }
 
-    selectPicture: function (arr) {
-      let self = this;
-      this.$axios
-        .request({
-          url: "http://192.168.31.109:3000" + self.findPicPath,
-          method: "get",
-          data: {},
-          params: {},
-        })
-        .then(function (response) {
-          console.log("查询成功");
-          // self.upload();
-        })
-        .catch((err) => {
-          console.log("catch" + err);
-        });
-    },
+    // selectPicture: function (arr) {
+    //   let self = this;
+    //   this.$axios
+    //     .request({
+    //       url: "http://192.168.31.109:3000" + self.findPicPath,
+    //       method: "get",
+    //       data: {},
+    //       params: {},
+    //     })
+    //     .then(function (response) {
+    //       console.log("查询成功");
+    //       // self.upload();
+    //     })
+    //     .catch((err) => {
+    //       console.log("catch" + err);
+    //     });
+    // },
 
     //批量管理图片
     batchManage: function () {
