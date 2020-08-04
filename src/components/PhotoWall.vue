@@ -79,9 +79,10 @@
     <!-- <el-button type="primary" @click="upload()">上传照片</el-button> -->
 
     <div v-for="(file_,i) in photoList" class="multimediaShow">
-      <el-tooltip class="itemToolTip" effect="light" :content="photoList[i].text" placement="top">
+      <el-tooltip class="itemToolTip" effect="light" :content="photoList[i].date" placement="top">
         <viewer>
           <img
+            class="pictureShow"
             alt="photo of ball"
             v-if="getFileType(photoList[i].path)==1"
             :src="urlXb  +'/'+ photoList[i].path"
@@ -89,7 +90,9 @@
             style="cursor:pointer"
           />
         </viewer>
+
         <video
+          class="pictureShow"
           v-if="getFileType(photoList[i].path)==2"
           alt="photo of ball"
           controls="controls"
@@ -97,6 +100,18 @@
           :id="'img_' + i"
           style="cursor:pointer"
         ></video>
+      </el-tooltip>
+
+      <el-tooltip
+        class="itemToolTip"
+        effect="light"
+        content="哈哈哈哈123213哈哈哈哈123213哈哈哈哈123213哈哈哈哈123213"
+        placement="top-end"
+      >
+        <div class="picText">
+          <br />
+          <a>哈哈哈哈123213哈哈哈哈123213哈哈哈哈123213哈哈哈哈123213</a>
+        </div>
       </el-tooltip>
     </div>
   </div>
@@ -115,8 +130,8 @@ export default {
       photoList: [],
       // urlXb: "http://192.168.31.109",
       // urlXb: "http://192.168.31.116:3000",
-      urlXb: "http://192.168.31.109:3000", //小服务器
-      // urlXb: "http://localhost:3000",
+      // urlXb: "http://192.168.31.109:3000", //小服务器
+      urlXb: "http://localhost:3000",
       pathXb: "/GetFileList",
       // pathXb: "/upload",
       errorImg: null,
@@ -427,6 +442,8 @@ export default {
   margin-bottom: 50px;
   margin-right: 50px;
   margin-left: 50px;
+}
+.pictureShow {
   border: 2px solid rgb(185, 167, 127);
   border-radius: 20px;
   box-shadow: 5px 5px 15px #888888;
@@ -434,7 +451,6 @@ export default {
   border-image-width: 30px;
   border-image-outset: 15px;
 }
-
 img {
   width: 100%;
   height: auto;
@@ -447,6 +463,18 @@ video {
   float: left;
 
   /* display: inline-block; */
+}
+
+.picText {
+  width: 100%;
+  float: left;
+  align-content: center;
+  font-family: "STXingkai";
+  font-size: 1.5em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
 }
 
 .el-upload .el-upload-dragger {
