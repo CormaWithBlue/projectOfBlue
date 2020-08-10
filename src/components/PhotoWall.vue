@@ -79,7 +79,7 @@
     <!-- <el-button type="primary" @click="upload()">上传照片</el-button> -->
 
     <div v-for="(file_,i) in photoList" class="multimediaShow">
-      <el-tooltip class="itemToolTip" effect="light" :content="photoList[i].date" placement="top">
+      <el-tooltip class="itemToolTip" effect="dark" :content="photoList[i].date" placement="top">
         <viewer>
           <img
             class="pictureShow"
@@ -102,17 +102,29 @@
         ></video>
       </el-tooltip>
 
-      <el-tooltip
+      <!-- <el-tooltip
         class="itemToolTip"
         effect="light"
-        content="哈哈哈哈123213哈哈哈哈123213哈哈哈哈123213哈哈哈哈123213"
-        placement="top-end"
+        :content="photoList[i].text"
+        placement="bottom"
       >
         <div class="picText">
           <br />
-          <a>哈哈哈哈123213哈哈哈哈123213哈哈哈哈123213哈哈哈哈123213</a>
+          <a>{{photoList[i].text}}</a>
         </div>
-      </el-tooltip>
+      </el-tooltip>-->
+      <el-popover
+        v-if="photoList[i].text"
+        placement="bottom"
+        width="150"
+        trigger="click"
+        :content="photoList[i].text"
+      >
+        <div class="picText" slot="reference">
+          <br />
+          <a>{{photoList[i].text}}</a>
+        </div>
+      </el-popover>
     </div>
   </div>
 </template>
@@ -286,7 +298,7 @@ export default {
       ).offsetTop;
       console.log("scrollTop:" + scrollTop + "&&offSetTop:" + offSetTop);
       if (
-        scrollTop > offSetTop - 300 &&
+        scrollTop > offSetTop - 400 &&
         this.photoList.length < this.getFileList.length
       ) {
         console.log("handleScroll in??");
