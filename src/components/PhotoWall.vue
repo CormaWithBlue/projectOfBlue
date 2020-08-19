@@ -12,9 +12,73 @@
     </context-menu>-->
     <div>
       <el-button type="primary" @click="dialogFormVisible = true" size="middle">上传</el-button>
-      <el-button type="warning" @click="batchManage()" size="middle">批量管理</el-button>
+      <el-button type="warning" @click="dialogVisible=true" size="middle">批量管理</el-button>
+      <el-button type="danger" @click="deletePhotos()" size="middle">删除</el-button>
+
+      <!-- 批量管理 -->
+      <el-dialog
+        title="批量管理"
+        :visible.sync="dialogVisible"
+        width="60%"
+        :before-close="handleClose"
+        class="dialogBox"
+      >
+        <span class="dialog-body">
+          <div>
+            <el-button type="info">修改</el-button>
+            <el-button type="danger">删除</el-button>
+          </div>
+          <div v-for="(file_,i) in photoList" class="thumbnailShow">
+            <div>
+              <img
+                alt="photo of ball"
+                v-if="getFileType(photoList[i].path)==1"
+                :src="urlXb  +'/'+ photoList[i].path"
+                :id="'img_' + i"
+              />
+              <div class="checkbox" style="position:absolute;top:0;right:0;z-index:1000">
+                <input id="box" type="checkbox" name="box" />
+              </div>
+            </div>
+
+            <div>
+              <video
+                v-if="getFileType(photoList[i].path)==2"
+                alt="photo of ball"
+                controls="controls"
+                :src="urlXb  +'/'+ photoList[i].path"
+                :id="'img_' + i"
+              ></video>
+              <div class="checkbox" style="position:absolute;top:0;right:0;z-index:1000">
+                <input id="box" type="checkbox" name="box" />
+              </div>
+              <br />
+            </div>
+          </div>
+          <br />
+          <br />
+          <br />
+          <br />
+          <br />
+          <br />
+          <div>
+            <el-pagination background layout="prev, pager, next" :total="100" :page-size="5"></el-pagination>
+          </div>
+        </span>
+        <br />
+        <!-- <span>asdasdasda</span> -->
+        <span slot="footer" class="dialog-footer">
+          <div class="diaFooter">
+            <el-button @click="dialogVisible = false">取 消</el-button>
+            <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+          </div>
+        </span>
+      </el-dialog>
+      <!-- 批量管理结束 -->
     </div>
+
     <div>
+      <!-- 上传图片/视频 -->
       <el-dialog title="上传" :visible.sync="dialogFormVisible">
         <el-form :model="form" name="upload">
           <el-form-item label="上传图片/视频:" :label-width="formLabelWidth"></el-form-item>
@@ -49,12 +113,14 @@
             ></el-input>
           </el-form-item>
         </el-form>
+
         <div slot="footer" class="dialog-footer">
           <el-button @click="cancelUpload()">取 消</el-button>
           <el-button type="primary" @click="submitUpload()">确 定</el-button>
           <!-- @click="dialogFormVisible = false" -->
         </div>
       </el-dialog>
+      <!-- 上传图片/视频结束 -->
     </div>
     <br />
     <br />
@@ -113,18 +179,21 @@
           <a>{{photoList[i].text}}</a>
         </div>
       </el-tooltip>-->
-      <el-popover
-        v-if="photoList[i].text"
-        placement="bottom"
-        width="150"
-        trigger="click"
-        :content="photoList[i].text"
-      >
-        <div class="picText" slot="reference">
-          <br />
-          <a>{{photoList[i].text}}</a>
-        </div>
-      </el-popover>
+      <div class="popover1">
+        <el-popover
+          class="elPopver"
+          v-if="photoList[i].text"
+          placement="bottom"
+          width="150"
+          trigger="click"
+          :content="photoList[i].text"
+        >
+          <div class="picText" slot="reference">
+            <br />
+            <a>{{photoList[i].text}}</a>
+          </div>
+        </el-popover>
+      </div>
     </div>
   </div>
 </template>
@@ -135,7 +204,7 @@ import Viewer from "v-viewer";
 
 export default {
   name: "PhotoWall",
-  data() {
+  data: function () {
     return {
       msg: "Welcome to Your Vue.js App",
       getFileList: [],
@@ -168,6 +237,8 @@ export default {
       inputData: "",
       arr: { id: "", startDate: "", endDate: "", text: "" },
       // uploadParams: "?uploadParams=" + this.inputData,
+      dialogVisible: false,
+      deletePicVisible: true,
     };
   },
   mounted() {
@@ -418,6 +489,17 @@ export default {
     //     });
     // },
 
+    handleClose(done) {
+      this.$confirm("确认关闭？")
+        .then((_) => {
+          done();
+        })
+        .catch((_) => {});
+    },
+
+    //批量删除图片
+    deletePhotos: function () {},
+
     //批量管理图片
     batchManage: function () {
       //1.页面中的图片变成方形缩略图形式，原本图片隐藏，每张图片左上角/左下角增加复选框
@@ -427,6 +509,23 @@ export default {
       //4.批量修改照片信息：修改用户选中的照片的说明
       //5.批量删除照片：弹出二次确认弹窗，确认后删除用户选中的图片
       //6.完成管理：页面中图片去掉复选框，收起页面增加的按钮，将“上传”和“批量管理”按钮进行显示
+      //1. 打开弹窗:
+      // this.$alert("请选择需要操作的图片:", "批量管理", {
+      //   confirmButtonText: "确定",
+      //   cancelButtonText: "取消",
+      // })
+      //   .then(({ value }) => {
+      //     this.$message({
+      //       type: "success",
+      //       message: "批量操作成功: " + value,
+      //     });
+      //   })
+      //   .catch(() => {
+      //     this.$message({
+      //       type: "info",
+      //       message: "取消批量操作",
+      //     });
+      //   });
     },
   },
 };
@@ -455,6 +554,28 @@ export default {
   margin-right: 50px;
   margin-left: 50px;
 }
+
+.dialogBox {
+  width: 100%;
+  height: 500px;
+}
+
+.thumbnailShow {
+  width: 60px;
+  height: auto;
+  float: left;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  margin-right: 10px;
+  margin-left: 10px;
+  position: relative;
+}
+
+.diaFooter {
+  display: inline-block;
+  height: 00px;
+}
+
 .pictureShow {
   border: 2px solid rgb(185, 167, 127);
   border-radius: 20px;
@@ -497,3 +618,22 @@ video {
   margin: 4px;
 }
 </style> 
+ <style lang="css">
+/* .el-dialog {
+  width: 100%;
+  height: 380px;
+  
+} */
+/* .el-dialog .el.dialog-body {
+  height: 300px;
+  width: auto;
+} */
+/* .el.diaFooter {
+  width: 100%;
+  height: 300px;
+} */
+/* .el-upload .el-upload-dragger {
+  width: 550px;
+  height: 350px;
+} */
+</style>
