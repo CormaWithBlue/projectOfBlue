@@ -11,70 +11,20 @@
     <!-- <a href="javascript:;" @click="deletePicture()">删除</a>
     </context-menu>-->
     <div>
-      <el-button type="primary" @click="dialogFormVisible = true" size="middle">上传</el-button>
-      <el-button type="warning" @click="dialogVisible=true" size="middle">批量管理</el-button>
-      <el-button type="danger" @click="deletePhotos()" size="middle">删除</el-button>
-
-      <!-- 批量管理 -->
-      <el-dialog
-        title="批量管理"
-        :visible.sync="dialogVisible"
-        width="60%"
-        :before-close="handleClose"
-        class="dialogBox"
-      >
-        <span class="dialog-body">
-          <div>
-            <el-button type="info">修改</el-button>
-            <el-button type="danger">删除</el-button>
-          </div>
-          <div v-for="(file_,i) in photoList" class="thumbnailShow">
-            <div>
-              <img
-                alt="photo of ball"
-                v-if="getFileType(photoList[i].path)==1"
-                :src="urlXb  +'/'+ photoList[i].path"
-                :id="'img_' + i"
-              />
-              <div class="checkbox" style="position:absolute;top:0;right:0;z-index:1000">
-                <input id="box" type="checkbox" name="box" />
-              </div>
-            </div>
-
-            <div>
-              <video
-                v-if="getFileType(photoList[i].path)==2"
-                alt="photo of ball"
-                controls="controls"
-                :src="urlXb  +'/'+ photoList[i].path"
-                :id="'img_' + i"
-              ></video>
-              <div class="checkbox" style="position:absolute;top:0;right:0;z-index:1000">
-                <input id="box" type="checkbox" name="box" />
-              </div>
-              <br />
-            </div>
-          </div>
-          <br />
-          <br />
-          <br />
-          <br />
-          <br />
-          <br />
-          <div>
-            <el-pagination background layout="prev, pager, next" :total="100" :page-size="5"></el-pagination>
-          </div>
-        </span>
-        <br />
-        <!-- <span>asdasdasda</span> -->
-        <span slot="footer" class="dialog-footer">
-          <div class="diaFooter">
-            <el-button @click="dialogVisible = false">取 消</el-button>
-            <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
-          </div>
-        </span>
-      </el-dialog>
-      <!-- 批量管理结束 -->
+      <el-button
+        type="primary"
+        v-show="multipleManageBtn"
+        @click="dialogFormVisible = true"
+        size="middle"
+      >上传</el-button>
+      <el-button
+        type="warning"
+        @click="multipleManage()"
+        v-show="multipleManageBtn"
+        size="middle"
+      >批量管理</el-button>
+      <el-button type="danger" v-show="multipleManageDel" @click="deletePhotos()" size="middle">删除</el-button>
+      <el-button type="primary" v-show="multipleManageDel" @click="cancelDelPic()" size="middle">取消</el-button>
     </div>
 
     <div>
@@ -87,14 +37,15 @@
               :action="urlXb + '/uploadPicture?uploadParams=' + inputData"
               multiple
               drag
-              :limit="5"
+              :limit="uploadLimits"
               :on-success="uploadSuccess"
               :before-upload="beforeUpload"
               :auto-upload="false"
+              :on-exceed="handleExceed"
               ref="upload"
               name="upload"
             >
-              <div slot="tip" class="el-upload__tip">只能上传图片或视频，图片大小不超过3MB，视频大小不超过45MB</div>
+              <div slot="tip" class="el-upload__tip">只能上传图片或视频，图片大小不超过3MB，视频大小不超过45MB,且每次不超过5个</div>
               <i class="el-icon-upload"></i>
               <div class="el-upload__text">
                 将文件拖到此处，或
@@ -144,28 +95,67 @@
 
     <!-- <el-button type="primary" @click="upload()">上传照片</el-button> -->
 
-    <div v-for="(file_,i) in photoList" class="multimediaShow">
-      <el-tooltip class="itemToolTip" effect="dark" :content="photoList[i].date" placement="top">
+    <div v-if="photoList.length" v-for="(file_,i) in photoList" class="multimediaShow">
+      <el-tooltip
+        class="itemToolTip"
+        effect="dark"
+        :content="photoList[i].date?photoList[i].date:''"
+        placement="top"
+      >
+        <br />
+        <!-- <div class="pictureShow" :src="urlXb  +'/'+ photoList[i].path" :id="'img_' + i">
+          <el-checkbox v-model="checked" v-show="multipleManageDel"></el-checkbox>
+        </div>-->
         <viewer>
+          <!-- <input type="checkbox" id="bike" value="Bike" v-show="multipleManageDel" /> -->
+          <!-- <el-checkbox v-model="checked" v-show="multipleManageDel"></el-checkbox> -->
+
           <img
             class="pictureShow"
             alt="photo of ball"
-            v-if="getFileType(photoList[i].path)==1"
+            v-if="getFileType(photoList[i].path?photoList[i].path:'')==1"
             :src="urlXb  +'/'+ photoList[i].path"
             :id="'img_' + i"
             style="cursor:pointer"
           />
+
+          <input
+            type="checkbox"
+            id="myCheck"
+            name="myCheck"
+            :v-model="deletePicId"
+            v-show="multipleManageDel"
+            style="zoom:280% right:0;float:left;width:20px;height:20px;"
+            :checked="checked"
+          />
+          <!-- <el-checkbox v-model="photoList[i].id" v-show="multipleManageDel"></el-checkbox> -->
         </viewer>
 
-        <video
-          class="pictureShow"
-          v-if="getFileType(photoList[i].path)==2"
-          alt="photo of ball"
-          controls="controls"
-          :src="urlXb  +'/'+ photoList[i].path"
-          :id="'img_' + i"
-          style="cursor:pointer"
-        ></video>
+        <!-- <div>
+        <el-checkbox v-model="checked" v-show="multipleManageDel"></el-checkbox>-->
+        <div class="pictureShow" v-if="getFileType(photoList[i].path?photoList[i].path:'')==2">
+          <video
+            class="pictureShow"
+            v-if="getFileType(photoList[i].path?photoList[i].path:'')==2"
+            alt="photo of ball"
+            controls="controls"
+            :src="urlXb  +'/'+ photoList[i].path"
+            :id="'img_' + i"
+            style="cursor:pointer"
+          ></video>
+
+          <input
+            type="checkbox"
+            id="myCheck"
+            name="myCheck"
+            :v-model="deletePicId"
+            v-show="multipleManageDel"
+            style="zoom:280% right:0;float:left;width:20px;height:20px;"
+            :checked="checked"
+          />
+        </div>
+
+        <!-- </div> -->
       </el-tooltip>
 
       <!-- <el-tooltip
@@ -200,6 +190,7 @@
 
 <script>
 import Viewer from "v-viewer";
+import Vue from "Vue";
 // import "@/assets/css/viewer.min.css";
 
 export default {
@@ -210,9 +201,9 @@ export default {
       getFileList: [],
       photoList: [],
       // urlXb: "http://192.168.31.109",
-      // urlXb: "http://192.168.31.116:3000",
-      // urlXb: "http://192.168.31.109:3000", //小服务器
-      urlXb: "http://localhost:3000",
+      urlXb: "http://104.168.170.62:8888",
+      // urlXb: "http://192.168.31.109:8888", //小服务器
+      // urlXb: "http://localhost:8888",
       pathXb: "/GetFileList",
       // pathXb: "/upload",
       errorImg: null,
@@ -238,7 +229,13 @@ export default {
       arr: { id: "", startDate: "", endDate: "", text: "" },
       // uploadParams: "?uploadParams=" + this.inputData,
       dialogVisible: false,
-      deletePicVisible: true,
+      // deletePicVisible: true,
+      multipleManageBtn: true,
+      multipleManageDel: false,
+      //批量删除选中的图片ID↓:
+      deletePicId: [],
+      checked: false,
+      uploadLimits: 5,
     };
   },
   mounted() {
@@ -300,7 +297,8 @@ export default {
           );
 
           self.getFileList = response.data.localtoken;
-
+          // "id":87,"date":"2020-08-27 22:09:33","text":"13","path":"IMG_0066.JPG"
+          self.photoList = [];
           for (
             var i = 0;
             i < (self.getFileList.length > 8 ? 8 : self.getFileList.length);
@@ -311,11 +309,19 @@ export default {
               : "";
             self.photoList.push(self.getFileList[i]);
           }
+          // debugger;
+          if (self.photoList.length) {
+            Vue.set(self.photoList, 0, self.photoList[0]);
+          } else {
+            self.photoList = [];
+          }
         })
         .catch((err) => {
           console.log("error!!!!!!!!!!!!!!!!!!");
           console.log("catch" + err);
+          self.getPicture();
         });
+      return 0;
 
       // var promise1 = this.$axios.get("http://192.168.31.182:8899/GetFileList");
 
@@ -335,6 +341,7 @@ export default {
       this.$refs.upload.submit();
       this.dialogFormVisible = false;
       this.inputData = "";
+      // this.getPicture();
     },
 
     //取消上传图片，点击按钮取消
@@ -412,6 +419,7 @@ export default {
           console.log("catch" + err);
         });
       this.$refs.upload.clearFiles();
+      this.getPicture();
     },
 
     // //判断文件类型是图片还是视频
@@ -443,6 +451,9 @@ export default {
 
       // this.uploadParams = "?uploadParams=" + this.inputData;
       // console.log("upload:" + this.uploadParams);
+      // if (file.length > 5) {
+      //   this.$message.error("上传文件数量不能超过5个！！");
+      // }
 
       if (fileType == 0) {
         this.$message.error(
@@ -460,6 +471,12 @@ export default {
       }
 
       return false;
+    },
+
+    // 文件超出个数限制时的钩子
+    handleExceed(file, fileList) {
+      const self = this;
+      self.$message.error("上传文件数量不能超过5个！！");
     },
     // clickPhoto: function() {
     //   var self = this;
@@ -497,35 +514,96 @@ export default {
         .catch((_) => {});
     },
 
-    //批量删除图片
-    deletePhotos: function () {},
+    //点击批量管理按钮
+    multipleManage: function () {
+      this.multipleManageBtn = false;
+      this.multipleManageDel = true;
+    },
 
-    //批量管理图片
-    batchManage: function () {
-      //1.页面中的图片变成方形缩略图形式，原本图片隐藏，每张图片左上角/左下角增加复选框
-      //2.1 页面上方增加按钮，增加‘批量修改照片时间’，‘批量修改照片信息’，‘批量删除照片’和‘完成管理’按钮
-      //2.2 页面隐藏上传和批量管理的按钮
-      //3.批量修改照片时间：修改用户选中的照片的上传时间
-      //4.批量修改照片信息：修改用户选中的照片的说明
-      //5.批量删除照片：弹出二次确认弹窗，确认后删除用户选中的图片
-      //6.完成管理：页面中图片去掉复选框，收起页面增加的按钮，将“上传”和“批量管理”按钮进行显示
-      //1. 打开弹窗:
-      // this.$alert("请选择需要操作的图片:", "批量管理", {
-      //   confirmButtonText: "确定",
-      //   cancelButtonText: "取消",
-      // })
-      //   .then(({ value }) => {
-      //     this.$message({
-      //       type: "success",
-      //       message: "批量操作成功: " + value,
-      //     });
-      //   })
-      //   .catch(() => {
-      //     this.$message({
-      //       type: "info",
-      //       message: "取消批量操作",
-      //     });
-      //   });
+    changeCheckedStatus: function () {
+      var x = document.getElementsByName("myCheck");
+      for (var i = 0; i < x.length; i++) {
+        x[i].checked = false;
+      }
+    },
+
+    //批量删除图片
+    deletePhotos: function () {
+      let self = this;
+      // promise.then(dosomething());
+      if (confirm("确认要删除？")) {
+        var x = document.getElementsByName("myCheck");
+        for (var i = 0; i < x.length; i++) {
+          if (x[i].checked) {
+            self.deletePicId.push(self.photoList[i].id);
+          }
+        }
+        if (self.deletePicId.length == 0) {
+          self.$message.error("没有选中文件!!");
+          self.multipleManageBtn = true;
+          self.multipleManageDel = false;
+          // self.checked = false;
+        } else {
+          //删除图片的接口  /DeletePicture
+          this.$axios
+            .request({
+              url: self.urlXb + "/DeletePicture",
+              method: "post",
+              params: {},
+              // headers: {
+              //   Connection: "keep-alive",
+              // },
+              data: {
+                id: self.deletePicId,
+              },
+            })
+            .then(function (response) {
+              console.log("删除图片的接口：");
+              console.log("Success：" + response.status);
+              // console.log("Time：" + (new Date().getTime() - time1) / 1000 + "s");
+              console.log("----------------------");
+              self.$notify.success({
+                title: "成功",
+                message: "文件删除成功",
+              });
+              // location.reload();
+              // debugger;
+
+              self.getPicture();
+              self.changeCheckedStatus();
+              self.multipleManageBtn = true;
+              self.multipleManageDel = false;
+
+              // Vue.set(self.photoList, 0, self.photoList[0]);
+            })
+            .catch((err) => {
+              console.log("删除图片的接口：");
+              console.log("fail:" + err);
+              console.log("----------------------");
+
+              self.$notify.error({
+                title: "失败",
+                message: "文件删除失败",
+              });
+              // location.reload();
+              self.changeCheckedStatus();
+              self.multipleManageBtn = true;
+              self.multipleManageDel = false;
+            });
+        }
+      } else {
+        this.cancelDelPic();
+        // self.checked = false;
+        return;
+      }
+    },
+
+    //取消批量删除图片
+    cancelDelPic: function () {
+      this.multipleManageBtn = true;
+      this.multipleManageDel = false;
+      this.$message.warning("取消删除文件");
+      this.changeCheckedStatus();
     },
   },
 };

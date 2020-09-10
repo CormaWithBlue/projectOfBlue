@@ -10,10 +10,6 @@ import Viewer from "v-viewer"
 import 'viewerjs/dist/viewer.css'
 import VueContextMenu from '@xunlei/vue-context-menu'
 
-
-
-
-
 Vue.config.productionTip = false
 
 Vue.prototype.$Element = {
