@@ -4,61 +4,223 @@
       <div class="xbgt">
         <img src="../../assets/logo_header.png" height="50px" />
       </div>
-      <div class="signIn">
-        <el-link icon="el-icon-s-custom" class="elLinkSignIn">登录</el-link>
+
+      <div class="signIn" id="signIn">
+        <!-- el-icon-s-custom -->
+        <el-button type="primary" size="medium" round @click="dialogFormVisibleLogin = true">
+          登录
+          <i class="el-icon-user-solid el-icon--right"></i>
+        </el-button>
         <a>|</a>
-        <el-link icon="el-icon-coordinate" class="elLinkSignIn">注册</el-link>
+        <!-- <el-link icon="el-icon-coordinate" class="elLinkSignIn">注册</el-link> -->
+        <el-button
+          icon="el-icon-s-claim"
+          size="medium"
+          round
+          @click="dialogFormVisibleRegister = true"
+        >注册</el-button>
+        <a></a>
       </div>
+
+      <div class="singInSuccess" id="singInSuccess" ref="singInSuccess" style="display:none">欢迎您：</div>
     </div>
 
     <div class="header_buttom">
       <div class="welcome">
         <img src="../../assets/welcome.gif" height="100px" width="400px" />
       </div>
-      <!-- <div class="navMenu_header">
-        <el-menu
-          :default-active="activeIndex"
-          class="el-menu-demo"
-          mode="horizontal"
-          @select="handleSelect"
-        >
-          <el-menu-item index="1">首页</el-menu-item>
-          <el-submenu index="2">
-            <template slot="title">玩游戏</template>
-            <el-menu-item index="2-1">2048</el-menu-item>
-            <el-menu-item index="2-2">扫雷</el-menu-item>
-            <el-menu-item index="2-3">打地鼠</el-menu-item>
-          </el-submenu>
-          <el-submenu index="3">
-            <template slot="title">照片墙</template>
-            <el-menu-item index="3-1">上传照片</el-menu-item>
-            <el-menu-item index="3-2">删除照片</el-menu-item>
-            <el-menu-item index="3-3">排列照片</el-menu-item>
-          </el-submenu>
-        </el-menu>
-      </div>-->
+    </div>
+
+    <div>
+      <!-- 登录弹窗 -->
+      <el-dialog title="登录" :visible.sync="dialogFormVisibleLogin" width="30%">
+        <el-form :model="form" name="loginUser">
+          <el-form-item>
+            <el-input
+              v-model="loginUserName"
+              autocomplete="off"
+              placeholder="请输入用户名"
+              maxlength="16"
+              show-word-limit
+              prefix-icon="el-icon-user"
+              clearable
+            ></el-input>
+          </el-form-item>
+
+          <el-form-item>
+            <el-input
+              v-model="loginPassword"
+              autocomplete="off"
+              placeholder="请输入密码"
+              maxlength="16"
+              show-word-limit
+              prefix-icon="el-icon-warning-outline"
+              clearable
+              show-password
+            ></el-input>
+          </el-form-item>
+        </el-form>
+
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="cancelLogin()">取 消</el-button>
+          <el-button type="primary" @click="loginUser()">确 定</el-button>
+        </div>
+      </el-dialog>
+    </div>
+
+    <div>
+      <!-- 注册弹窗 -->
+      <el-dialog title="注册用户" :visible.sync="dialogFormVisibleRegister" width="40%">
+        <el-form :model="form" name="registerUser">
+          <el-form-item label="用户名:" :label-width="formLabelWidth">
+            <el-input
+              v-model="registerUserName"
+              autocomplete="off"
+              placeholder="请设置用户名，可用于登录"
+              maxlength="16"
+              show-word-limit
+              prefix-icon="el-icon-user"
+              clearable
+            ></el-input>
+          </el-form-item>
+
+          <el-form-item label="密码:" :label-width="formLabelWidth">
+            <el-input
+              v-model="registerPassword"
+              autocomplete="off"
+              placeholder="请设置登录密码"
+              maxlength="16"
+              show-word-limit
+              prefix-icon="el-icon-warning-outline"
+              clearable
+              show-password
+            ></el-input>
+          </el-form-item>
+
+          <el-form-item label="确认密码:" :label-width="formLabelWidth">
+            <el-input
+              v-model="registerPasswordConfirm"
+              autocomplete="off"
+              placeholder="请再次输入密码"
+              maxlength="16"
+              show-word-limit
+              prefix-icon="el-icon-warning-outline"
+              clearable
+            ></el-input>
+          </el-form-item>
+
+          <el-form-item label="用户昵称:" :label-width="formLabelWidth">
+            <el-input
+              v-model="registerNickName"
+              autocomplete="off"
+              placeholder="请设置用户昵称"
+              maxlength="16"
+              show-word-limit
+              prefix-icon="el-icon-s-custom"
+              clearable
+            ></el-input>
+          </el-form-item>
+        </el-form>
+
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="cancelRegister()">取 消</el-button>
+          <el-button type="primary" @click="registerUser()">确 定</el-button>
+        </div>
+      </el-dialog>
     </div>
   </div>
 </template>
 
 <script>
+import Vue from "Vue";
 export default {
   name: "inspiration",
   components: {},
   data() {
     return {
       activeIndex: "1",
-      activeIndex2: "1"
+      activeIndex2: "1",
+      dialogFormVisibleLogin: false,
+      dialogFormVisibleRegister: false,
+      form: {},
+      formLabelWidth: "120px",
+      input: "",
+      loginUserName: "",
+      loginPassword: "",
+      registerNickName: "",
+      registerUserName: "",
+      registerPassword: "",
+      registerPasswordConfirm: "",
+      urlXb: "http://localhost:8888",
+      loginUserURL: "/userLogin",
+      registerUserURL: "/addUser",
     };
   },
-  created: function() {
+  created: function () {
     this.$emit("public_header", false);
   },
   methods: {
     handleSelect(key, keyPath) {
       console.log(key, keyPath);
-    }
-  }
+    },
+    cancelLogin: function () {
+      this.dialogFormVisibleLogin = false;
+      this.loginUserName = "";
+      this.loginPassword = "";
+    },
+    loginUser: function (res) {
+      // this.$refs.upload.submit();
+      let self = this;
+      this.$axios
+        .request({
+          url: self.urlXb + self.loginUserURL,
+          method: "post",
+          data: {
+            userName: self.loginUserName,
+            password: self.loginPassword,
+          },
+          params: {},
+        })
+        .then(function (response) {
+          console.log("登录成功");
+          self.$notify({
+            title: "成功",
+            message: "登录成功",
+            type: "success",
+          });
+        })
+        .catch((err) => {
+          console.log("catch" + err);
+          self.$notify.error({
+            title: "错误",
+            message: "登录失败，请检查用户名和密码",
+          });
+        });
+      self.loginSucess();
+    },
+
+    loginSucess: function () {
+      this.dialogFormVisibleLogin = false;
+      document.getElementById("signIn").style.display = "none";
+      // document.getElementById("singInSuccess").style.visibility = "visible";
+      singInSuccess.style.display = "inline";
+      this.loginUserName = "";
+      this.loginPassword = "";
+    },
+
+    registerUser: function () {
+      this.dialogFormVisibleRegister = false;
+      this.registerNickName = "";
+      this.registerUserName = "";
+      this.registerPassword = "";
+    },
+    cancelRegister: function () {
+      this.dialogFormVisibleRegister = false;
+      this.registerNickName = "";
+      this.registerUserName = "";
+      this.registerPassword = "";
+    },
+  },
 };
 </script>
 
@@ -115,18 +277,23 @@ export default {
   vertical-align: bottom;
   background-color: rgb(240, 243, 244);
 } */
+
 .signIn {
-  width: 200px;
+  width: 250px;
   /* height: 150px; */
   float: right;
   font-size: 20px;
   font-weight: bold;
-  height: 50px;
-  /* line-height: 30px; */
+  height: 30px;
+  margin: 8px auto;
 }
-.elLinkSignIn {
+.signInSuccess {
+  width: 50px;
+  /* height: 150px; */
+  float: right;
   font-size: 20px;
-  font-weight: 800;
-  height: 50px;
+  font-weight: bold;
+  height: 30px;
+  margin: 8px auto;
 }
 </style>

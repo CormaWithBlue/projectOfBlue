@@ -1,15 +1,5 @@
 <template>
   <div class="photoWall">
-    <!-- <context-menu
-      class="right-menu"
-      :target="contextMenuTarget"
-      :show="contextMenuVisible"
-      @update:show="(show) => contextMenuVisible = show"
-    >-->
-    <!-- <a href="javascript:;" @click="copyMsg">复制</a> -->
-    <!-- <a href="javascript:;" @click="quoteMsg">引用</a> -->
-    <!-- <a href="javascript:;" @click="deletePicture()">删除</a>
-    </context-menu>-->
     <div>
       <el-button
         type="primary"
@@ -201,23 +191,14 @@ export default {
       getFileList: [],
       photoList: [],
       // urlXb: "http://192.168.31.109",
-      urlXb: "http://104.168.170.62:8888",
+      // urlXb: "http://104.168.170.62:8888",
       // urlXb: "http://192.168.31.109:8888", //小服务器
-      // urlXb: "http://localhost:8888",
+      urlXb: "http://localhost:8888",
       pathXb: "/GetFileList",
       // pathXb: "/upload",
       errorImg: null,
       dialogFormVisible: false,
-      form: {
-        name: "",
-        region: "",
-        date1: "",
-        date2: "",
-        delivery: false,
-        type: [],
-        resource: "",
-        desc: "",
-      },
+      form: {},
       formLabelWidth: "120px",
       addPicPath: "/uploadPicture",
       findPicPath: "/GetFileList",
