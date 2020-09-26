@@ -22,7 +22,17 @@
         <a></a>
       </div>
 
-      <div class="singInSuccess" id="singInSuccess" ref="singInSuccess" style="display:none">欢迎您：</div>
+      <div
+        class="singInSuccess"
+        id="singInSuccess"
+        ref="singInSuccess"
+        style="display:none;font-size:16px;font-family:'幼圆';font-weight:bold"
+      >
+        <br />
+        <a>欢迎您：</a>
+        {{loginNickName}}
+        <a>&nbsp;&nbsp;&nbsp;&nbsp;</a>
+      </div>
     </div>
 
     <div class="header_buttom">
@@ -147,6 +157,7 @@ export default {
       input: "",
       loginUserName: "",
       loginPassword: "",
+      loginNickName: "",
       registerNickName: "",
       registerUserName: "",
       registerPassword: "",
@@ -168,6 +179,7 @@ export default {
       this.loginUserName = "";
       this.loginPassword = "";
     },
+
     loginUser: function (res) {
       // this.$refs.upload.submit();
       let self = this;
@@ -183,6 +195,8 @@ export default {
         })
         .then(function (response) {
           console.log("登录成功");
+          self.loginNickName = response.data.localtoken[0].nickname;
+          console.log("self.loginNickName:   " + self.loginNickName);
           self.$notify({
             title: "成功",
             message: "登录成功",
@@ -203,7 +217,8 @@ export default {
       this.dialogFormVisibleLogin = false;
       document.getElementById("signIn").style.display = "none";
       // document.getElementById("singInSuccess").style.visibility = "visible";
-      singInSuccess.style.display = "inline";
+      singInSuccess.style.display = "block";
+      singInSuccess.style.float = "right";
       this.loginUserName = "";
       this.loginPassword = "";
     },
@@ -288,12 +303,14 @@ export default {
   margin: 8px auto;
 }
 .signInSuccess {
-  width: 50px;
+  width: 250px;
   /* height: 150px; */
   float: right;
   font-size: 20px;
   font-weight: bold;
   height: 30px;
   margin: 8px auto;
+  font-size: 12px;
+  font-family: "微软雅黑";
 }
 </style>
